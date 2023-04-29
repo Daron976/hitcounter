@@ -16,8 +16,14 @@ class HitCountersController < ApplicationController
 
   def update
     application_name = params[:application_name]
-    @hit = HitCounter.where(application_name:)
-    @hit.increment(:application_counter)
+    hit_presence = HitCounter.exists?(application_name:)
+    if hit_presence
+      @hit = HitCounter.find_by(application_name:)
+      @hit.increment!(:application_counter)
+      render json: { message: 'hitCounter has been updated!', hit_obj: @hit }, status: :accepted
+    else
+      render json: { message: 'hitCounter is not in the database!' }, status: :not_found
+    end
   end
 
   def hit_counter_params
